@@ -1,8 +1,9 @@
-#
-# Cookbook Name:: custom_apache
+##################################################
+# Cookbook:: custom_apache
 # Recipe:: default
-#
-# Copyright (c) 2015 The Authors, All Rights Reserved.
+##################################################
+# Copyright:: (c) 2015 The Authors, All Rights Reserved.
+##################################################
 
 #################################################
 # This demonstrates CHEF-4: Some Attribute Methods.
@@ -10,9 +11,9 @@
 #################################################
 
 # Load from node attributes some variables we'll need.
-site_name = node.site.name
-content_owner = node.site.content.owner
-content_group = node.site.content.group
+site_name = node['site']['name']
+content_owner = node['site']['content']['owner']
+content_group = node['site']['content']['group']
 
 # Ensure the apt cache is up-to-date.
 apt_update 'Update the apt cache daily' do
@@ -26,13 +27,7 @@ end
 #################################################
 
 # Install additional Apache packages.
-packages = %w( libapache2-modsecurity libapache2-mod-spamhaus )
-
-packages.each do |p|
-  package 'install libapache2 package' do
-    package_name p
-  end
-end
+package %w( libapache2-modsecurity libapache2-mod-spamhaus )
 
 # Create the group that owns web content.
 group content_group do
@@ -49,10 +44,8 @@ user content_owner do
   group content_group
   home "/home/#{content_owner}"
   shell '/bin/bash'
-  supports({
-    manage_home: true,
-    non_unique: false
-  })
+  manage_home true
+  non_unique false
 end
 
 # Use the custom site resource to configure the website.
@@ -64,12 +57,12 @@ end
 file '/var/www/html/index.html' do
   owner content_owner
   group content_group
-  mode 0644
+  mode '644'
 end
 
 # Configure the web content directory owner.
 directory '/var/www/html' do
   owner content_owner
   group content_group
-  mode 0755
+  mode '755'
 end
